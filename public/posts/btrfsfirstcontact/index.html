@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang='en' ><meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+
+<title>My foray into Btrfs | FloUhl&#39;s Site</title>
+
+<meta name="generator" content="Hugo Eureka 0.8.0" />
+<link rel="stylesheet" href="https://flouhl.github.io/%60/%60/css/eureka.css">
+<script defer src="https://flouhl.github.io/%60/%60/js/eureka.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+  as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/styles/solarized-light.min.css"
+   media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/highlight.min.js"
+   crossorigin></script>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.0/build/languages/dart.min.js"
+     crossorigin></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/js/all.min.js"
+   integrity="sha256-uNYoXefWRqv&#43;PsIF/OflNmwtKM4lStn9yrz2gVl6ymo="  crossorigin></script>
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+   integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3&#43;Aro6EYUG4&#43;cU&#43;KJWu/X"  media="print"
+  onload="this.media='all';this.onload=null" crossorigin>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" 
+  integrity="sha384-g7c&#43;Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI&#43;sEnkvrMWph2EDg4"  crossorigin></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js"
+   integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC&#43;Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa"  crossorigin></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+    });
+  });
+</script>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js" 
+  integrity="sha256-Zmpaaj&#43;GXFsPF5WdPArSrnW3b30dovldeKsW00xBVwE="  crossorigin></script>
+
+
+<link rel="icon" type="image/png" sizes="32x32" href="https://flouhl.github.io/%60/%60/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_32x32_fill_box_center_2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://flouhl.github.io/%60/%60/images/icon_hu64421c6c7700f606f0ad45d807017b09_5843_180x180_fill_box_center_2.png">
+
+<meta name="description"
+  content="My foray into Btrfs Why? Fedora uses it as default for its Workstation istall and I wanted to try it for a while as the snapshotting and bitrot-detection seemed interesting for me for a while.
+There seem to be some benefits to be gained from reinstalling my OS on Btrfs. This blog is meant to document my learning.
+ What is Btrfs, really? According to the Btrfs-Wiki:
+ Btrfs is a modern copy on write (CoW) filesystem for Linux aimed at implementing advanced features while also focusing on fault tolerance, repair and easy administration.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1 ,
+      "name":"Posts",
+      "item":"https://flouhl.github.io/%60/posts/"},{
+      "@type": "ListItem",
+      "position": 2 ,
+      "name":"My foray into Btrfs",
+      "item":"https://flouhl.github.io/%60/posts/btrfsfirstcontact/"}]
+}
+</script>
+
+
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://flouhl.github.io/%60/posts/btrfsfirstcontact/"
+    },
+    "headline": "My foray into Btrfs | FloUhl\u0027s Site","datePublished": "2021-05-03T00:00:00+00:00",
+    "dateModified": "2021-05-03T00:00:00+00:00",
+    "wordCount":  3347 ,
+    "publisher": {
+        "@type": "Person",
+        "name": "F. Uhl",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://flouhl.github.io/%60/%60/images/icon.png"
+        }
+        },
+    "description": "My foray into Btrfs Why? Fedora uses it as default for its Workstation istall and I wanted to try it for a while as the snapshotting and bitrot-detection seemed interesting for me for a while.\nThere seem to be some benefits to be gained from reinstalling my OS on Btrfs. This blog is meant to document my learning.\n What is Btrfs, really? According to the Btrfs-Wiki:\n Btrfs is a modern copy on write (CoW) filesystem for Linux aimed at implementing advanced features while also focusing on fault tolerance, repair and easy administration."
+}
+</script><meta property="og:title" content="My foray into Btrfs | FloUhl&#39;s Site" />
+<meta property="og:type" content="article" />
+
+
+<meta property="og:image" content="https://flouhl.github.io/%60/%60/images/icon.png">
+
+
+<meta property="og:url" content="https://flouhl.github.io/%60/posts/btrfsfirstcontact/" />
+
+
+
+
+<meta property="og:description" content="My foray into Btrfs Why? Fedora uses it as default for its Workstation istall and I wanted to try it for a while as the snapshotting and bitrot-detection seemed interesting for me for a while.
+There seem to be some benefits to be gained from reinstalling my OS on Btrfs. This blog is meant to document my learning.
+ What is Btrfs, really? According to the Btrfs-Wiki:
+ Btrfs is a modern copy on write (CoW) filesystem for Linux aimed at implementing advanced features while also focusing on fault tolerance, repair and easy administration." />
+
+
+
+
+<meta property="og:locale" content="en" />
+
+
+
+
+<meta property="og:site_name" content="FloUhl&#39;s Site" />
+
+
+
+
+
+
+<meta property="article:published_time" content="2021-05-03T00:00:00&#43;00:00" />
+
+
+<meta property="article:modified_time" content="2021-05-03T00:00:00&#43;00:00" />
+
+
+
+<meta property="article:section" content="posts" />
+
+
+
+
+<body class="flex flex-col min-h-screen">
+  <header class="fixed flex items-center w-full min-h-16 pl-scrollbar z-50 bg-secondary-bg shadow-sm">
+    <div class="w-full max-w-screen-xl mx-auto"><script>
+    let storageColorScheme = localStorage.getItem("lightDarkMode")
+    if (((storageColorScheme == 'Auto' || storageColorScheme == null) && window.matchMedia("(prefers-color-scheme: dark)").matches) || storageColorScheme == "Dark") {
+        document.getElementsByTagName('html')[0].classList.add('dark')
+    }
+</script>
+<nav class="flex items-center justify-between flex-wrap px-4 py-4 md:py-0">
+    <a href="/%60/" class="mr-6 text-primary-text text-xl font-bold">FloUhl&#39;s Site</a>
+    <button id="navbar-btn" class="md:hidden flex items-center px-3 py-2" aria-label="Open Navbar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="target"
+        class="hidden block md:flex md:flex-grow md:justify-between md:items-center w-full md:w-auto text-primary-text z-20">
+        <div class="md:flex md:h-16 text-sm md:flex-grow pb-4 md:pb-0 border-b md:border-b-0">
+            <a href="/%60/#about" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">About</a>
+            <a href="/%60/%60/posts/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Posts</a>
+            <a href="/%60/%60/docs/" class="block mt-4 md:inline-block md:mt-0 md:h-(16-4px) md:leading-(16-4px) box-border md:border-t-2 md:border-b-2  border-transparent  mr-4">Docs</a>
+        </div>
+
+        <div class="flex">
+            <div class="relative pt-4 md:pt-0">
+                <div class="cursor-pointer hover:text-eureka" id="lightDarkMode">
+                    <i class="fas fa-adjust"></i>
+                </div>
+                <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-30" id="is-open">
+                </div>
+                <div class="absolute flex flex-col left-0 md:left-auto right-auto md:right-0 hidden bg-secondary-bg w-48 rounded py-2 border border-tertiary-bg cursor-pointer z-40"
+                    id='lightDarkOptions'>
+                    <span class="px-4 py-1 hover:text-eureka" name="Light">Light</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Dark">Dark</span>
+                    <span class="px-4 py-1 hover:text-eureka" name="Auto">Auto</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed hidden inset-0 opacity-0 h-full w-full cursor-default z-0" id="is-open-mobile">
+    </div>
+
+</nav>
+<script>
+    
+    let element = document.getElementById('lightDarkMode')
+    if (storageColorScheme == null || storageColorScheme == 'Auto') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener('change', switchDarkMode)
+        })
+    } else if (storageColorScheme == "Light") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'sun')
+        element.firstElementChild.classList.add('fa-sun')
+    } else if (storageColorScheme == "Dark") {
+        element.firstElementChild.classList.remove('fa-adjust')
+        element.firstElementChild.setAttribute("data-icon", 'moon')
+        element.firstElementChild.classList.add('fa-moon')
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getcolorscheme();
+        switchBurger();
+    });
+</script>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    <div class="pl-scrollbar">
+      <div class="w-full max-w-screen-xl lg:px-4 xl:px-8 mx-auto">
+
+
+<div class="grid grid-cols-2 lg:grid-cols-8 gap-4 lg:pt-12">
+    <div
+        class="col-span-2 lg:col-start-2 lg:col-span-6 bg-secondary-bg rounded px-6 py-8">
+        <h1 class="font-bold text-3xl text-primary-text">My foray into Btrfs</h1>
+        <div class="flex flex-wrap flex-row items-center mt-2 text-tertiary-text">
+    <div class="mr-6 my-2">
+        <i class="fas fa-calendar mr-1"></i>
+        <span>2021-05-03</span>
+    </div>
+    <div class="mr-6 my-2">
+        <i class="fas fa-clock mr-1"></i>
+        <span>16 min read</span>
+    </div>
+    
+    
+
+    
+</div>
+        
+        
+        
+
+        <div class="content">
+            <h1 id="my-foray-into-btrfs">My foray into Btrfs</h1>
+<h2 id="why">Why?</h2>
+<p>Fedora uses it as default for its Workstation istall and I wanted to try it for a while as the snapshotting and bitrot-detection seemed interesting for me for a while.<br>
+There seem to be some benefits to be gained from reinstalling my OS on Btrfs. This blog is meant to document my learning.</p>
+<hr>
+<h2 id="what-is-btrfs-really">What is Btrfs, really?</h2>
+<p>According to the <a href="https://btrfs.wiki.kernel.org/index.php/Main_Page">Btrfs-Wiki</a>:</p>
+<blockquote>
+<p><strong>Btrfs</strong> is a modern copy on write (CoW) filesystem for Linux aimed at implementing advanced features while also focusing on fault tolerance, repair and easy administration.<br>
+Its main benefits are:</p>
+<ul>
+<li><strong>Snapshots</strong> which do not make the full copy of files (CoW)</li>
+<li><strong>RAID</strong> - support for software based RAID 0, RAID 1, RAID 10</li>
+<li><strong>Self-healing</strong> - checksums for data and metadata, automatic detection of silent data corruptions</li>
+</ul>
+</blockquote>
+<p>That sounds all fine and dandy, but what exactly does all of that mean?<br>
+<em>Copy on Write</em> means that between versions of a file only the deltas get written to the disk. So if there is a change in the file only the change gets written to the drive.
+Therefore a lot of the information is saved in Metadata pointing at the right parts of data written on the file and how it should be assembled.
+This makes it also easy to implement <em>lazy copies</em> where a copy is just a reference to the original file.
+Copy on write is however not recommended for heavily updated-in-place files such as VM-images and database stores.
+This is caused by the copy in place where you always keep the original in addition to the updated file.<br>
+What is also attractive about Btrfs is the fact that the file system also handles volume management, compression, snapshotting without needing extras such as LVM.<br>
+The snapshotting is allowing rollbacks to prior states of the file system, so if something gets messed up real bad you can just go back to a prior saved step. There are tools that make the interface with snapshotting easier, for example <code>snapper</code> (which also has integration in Fedoras <code>dnf</code> package manager via a plugin). More on that later.<br>
+Compression is a nice feature of Btrfs as it reduces file sizes, and who doesn&rsquo;t like to have more space on the harddrive.
+This is also helpful in that it reduces wear on the drives, as there are fewer writes to disk.
+It seems that the Fedora devs also think so as they enable transparent compression by default on install.<br>
+The included checksumming/self-healing is useful as it keeps track of degrading data.
+This is great for people like me who are always concerned about their data developing errors (I already lost some photos to bitrot).</p>
+<p>These features in turn mean, that Btrfs is slightly less performant than other file systems like XFS or Ext4 as the overhead for the checksumming and compression does impact performance.</p>
+<p>One thing that Btrfs does not manage itself is encryption. However this can easily be solved by using <a href="https://www.kernel.org/doc/html/latest/admin-guide/device-mapper/dm-crypt.html#"><code>dm-crypt</code></a>, the transparend disk encription subsystem in the Linux kernel.</p>
+<hr>
+<h2 id="where-to-start">Where to start?</h2>
+<p>A good start is the aforementioned <a href="https://btrfs.wiki.kernel.org/index.php/Main_Page">Btrfs-Wiki</a> and for a more practical guide the <a href="https://wiki.archlinux.org/index.php/Btrfs">Arch-Wiki Page</a>.
+For getting a good overview the <a href="https://btrfs.wiki.kernel.org/index.php/SysadminGuide">SysadminGuide</a> is a great start.
+And hopefully this article.</p>
+<hr>
+<p>Based largely in on the Btrfs-Wikis' SysadminGuide I will now talk about important parts of the filesystem.</p>
+<h2 id="data-usageallocation">Data usage/allocation</h2>
+<p>(Adapted from the <a href="https://btrfs.wiki.kernel.org/index.php/SysadminGuide#Data_usage_and_allocation">Btrfs-Wiki</a>)<br>
+The lowest level of the file system deals with a pool of raw storage made up of block devices containing the volume and its subvolumes.<br>
+The size of this pool is reported by the <code>df</code>-command.<br>
+The structure is that the volume needs storage to hold the data, which it allocates in chunks from the raw storage, typically in 1GiB increments. This allocation is what you then see in the output of <code>btrfs filesystem</code>.
+A chunk is therefore a piece of storage Btrfs can put data on.
+To cite:</p>
+<blockquote>
+<p>Terminology: space is <em>allocated</em> to chunks, and space is <em>used</em> by blocks. A chunk with no used blocks in it is <em>unallocated</em>; a chunk with 1 or more used blocks in it is <em>allocated</em>. All chunks can be allocated even if not all space is used.</p>
+</blockquote>
+<h1 id="subvolumes">Subvolumes</h1>
+<p>A subvolume is a independently mountable POSIX filetree, <strong>not a block device</strong>.
+The cool thing about Btrfs is that each top level subvolume or volume has a mountable root and that each volume can contain more than one filetree.<br>
+When compared with LVM logical volumes Btrfs subvolumes are not similar, as the LVM logical volume is a block device in its own right containing its filesystem or container (dm-crypt, MD RAID&hellip;).<br>
+Each subvolume root directory differs from a directory in that each subvolume has its distinct inode number space and each inode under a subvolume has a distinct device number.</p>
+<h2 id="subvolume-layout">Subvolume Layout</h2>
+<p>There are two main/basic layouts to use: <em>flat</em> and <em>nested</em>.\</p>
+<hr>
+<p><strong>Flat</strong>: Here the subvolumes are children of the toplevel subvolume and are directly below the top level subvolume.<br>
+This has several implications:</p>
+<ul>
+<li>Subvolume management is considered to be easier as the effective layout is more directly visible.</li>
+<li>All subvolumes need to be mounted manually (or via fstab) to the desired location</li>
+<li>Each subvolume can be mounted with some options being different, but all options must always be explicitely stated.</li>
+<li>Everthing in the volume that is <strong>not</strong> beneath a mounted subvolume is inaccessible. This can be beneficial for security/snapshots</li>
+</ul>
+<hr>
+<p><strong>Nested</strong>: Here we have subvolumes located anywhere in the file hierarchy. Typically in their desired locations, where they&rsquo;d be typically mounted in the flat schema.<br>
+The following implications arise:</p>
+<ul>
+<li>Management of snapshots is especially rolling them may be considered more difficult as the effective layout is not directly visible.</li>
+<li>Subvolumes don&rsquo;t need to be mounted manually, they appear automatically at the respective tree-base</li>
+<li>for each of the subvols the mount option of their mountpoint applies.</li>
+<li>Everything is visible</li>
+</ul>
+<hr>
+<p>There is also the possibility to create a <strong>mixed</strong> layout such as a flat base layout with certain parts of the filesystem being put in nested subvolumes.
+Here care must be taken with regard to snapshotting, there are no recursive snapshots, so nested subvolumes must be snapshotted separately.</p>
+<h2 id="when-to-make-subvolumes---guidelines">When to Make Subvolumes - Guidelines</h2>
+<p><strong>Nested Subvolumes</strong> are <strong>not</strong> going to be part of the snapshots of their parent subvolume. This can be used to exclude certain parts of the filesystem from being snapshot (for example software builds).</p>
+<p>To split areas that are complete/consistent in themselves.</p>
+<ul>
+<li><code>/home</code></li>
+<li><code>/var/www</code></li>
+<li><code>/var/lib/postgresql</code><br>
+these parts are more or less contained within them selves and &ldquo;operate autonomously&rdquo; from the rest of the subvolumes.</li>
+</ul>
+<p>Splitting them when they &ldquo;belong together&rdquo; or depend in the state of each other (such as <code>/var/lib</code>, <code>/usr</code>, <code>lib</code>, <code>/bin</code>) is not recommended in conjunction with snapshots as this can lead to breakage.<br>
+Splitting can be useful in cases of btrfs-send/-receive, as this feature works on subvolumes.<br>
+Splitting might also be sensible in cases of special mount options.</p>
+<h1 id="snapshots">Snapshots</h1>
+<p>A could be described as saving the metadata of a subvolume at a specific point in time.
+Therefore they are heavily reliant on the CoW capabilities of Btrfs.<br>
+In the <a href="https://btrfs.wiki.kernel.org/index.php/SysadminGuide#Snapshots">Btrfs-Wiki</a> a Snapshot is described as:</p>
+<blockquote>
+<p>[&hellip;] a subvolume that shares its data (and metadata) with some other subvolume, using Btrfs&rsquo;s COW capabilities.</p>
+</blockquote>
+<p>Once a snapshot is taken there is no difference between the original subvolume and the snapshot, after the snapshot the &ldquo;original&rdquo; subvolume is then written to and its layout changes.<br>
+The snapshot can be rolled back to by unmounting and renaming the original subvolume and then renaming the snapshot to the original subvolumes name and mounting the snapshot.</p>
+<p>Security issues arise when using snapshots as permissions that are made after a snapshot is made do not get &ldquo;backported&rdquo; to the snapshot.
+Care has to be taken in such cases to not &ldquo;leak&rdquo; sensitive information etc. via snapshots.
+This could arise in nested layouts, as snapshots may be visible to other users.</p>
+<hr>
+<p>After all this theoretical background lets get a bit more practical.</p>
+<h1 id="what-did-i-do---exploration-phase">What did I do? - Exploration Phase</h1>
+<p>I installed Fedora 34 on a 500GB NVME-SSD on my desktop.
+As I wanted to get going asap I chose to nuke and pave over my previous install and use the automatic partitioning.
+What this then created was a layout that looks as follows:</p>
+<pre><code>NAME                             MAJ:MIN RM   SIZE RO TYPE  MOUNTPOINT
+nvme0n1                          259:0    0 476.9G  0 disk  
+├─nvme0n1p1                      259:1    0   600M  0 part  /boot/efi
+├─nvme0n1p2                      259:2    0     1G  0 part  /boot
+└─nvme0n1p3                      259:3    0 475.4G  0 part  
+  └─luks-many-numbers-here       253:0    0 475.3G  0 crypt /home
+</code></pre>
+<p>So we have a <code>/boot/efi</code>-partition that is a vfat formatted, a <code>/boot</code> partition that is ext4 formatted and the btrfs-partition containing everything else.
+Now this is just a vague overview. When checking the <a href="https://fedoraproject.org/wiki/Btrfs">fedoraproject wiki</a> and/or the fstab we find out that the default layout of the Btrfs-pool is two subvolumes, one for <code>/</code>(root) and one for <code>/home</code>.<br>
+More information can be gathered via the <code>btrfs</code> command in the terminal.</p>
+<h2 id="the-btrfs-commands">The <code>btrfs</code>-commands</h2>
+<p>In this part I lean heavily on the man-pages.</p>
+<h3 id="btrfs-filesystem"><code>btrfs filesystem</code></h3>
+<p>As an example here is the default <code>btrfs filesystem show output</code>:</p>
+<pre><code>Label: 'fedora_localhost-live'  uuid: uuid-goes-here-with-numbers
+	Total devices 1 FS bytes used 25.34GiB
+	devid    1 size 475.34GiB used 27.02GiB path /dev/mapper/luks-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+</code></pre>
+<p>We can see that the label of the filesystem is still the one of the live host, so how do we change it?<br>
+<code>btrfs filesystem label</code> is the answer:</p>
+<pre><code>btrfs filesystem label [&lt;device&gt;|&lt;mountpoint&gt;] &lt;newlabel&gt;
+</code></pre>
+<p>Some other options that can be found in the <code>btrfs filesystem</code> command are <code>df -h</code> for the current allocation of block group types per mount point.
+However a nice overview can be had by using <code>btrfs filesystem usage &lt;path&gt;</code>.
+This command is supposed to replace the <code>df</code> command in the long run and when using it it is immediately appearent why, as it is much clearer.</p>
+<pre><code>btrfs filesystem usage /
+Overall:
+    Device size:            475.34GiB
+    Device allocated:        27.02GiB
+    Device unallocated:     448.32GiB
+    Device missing:             0.00B
+    Used:                    25.34GiB
+    Free (estimated):       449.43GiB	(min: 449.43GiB)
+    Free (statfs, df):      449.43GiB
+    Data ratio:                  1.00
+    Metadata ratio:              1.00
+    Global reserve:          59.20MiB	(used: 0.00B)
+    Multiple profiles:             no
+
+Data,single: Size:26.01GiB, Used:24.89GiB (95.72%)
+   /dev/mapper/luks-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx    26.01GiB
+
+Metadata,single: Size:1.01GiB, Used:457.36MiB (44.32%)
+   /dev/mapper/luks-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx     1.01GiB
+
+System,single: Size:4.00MiB, Used:16.00KiB (0.39%)
+   /dev/mapper/luks-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx     4.00MiB
+
+Unallocated:
+   /dev/mapper/luks-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx   448.32GiB
+</code></pre>
+<p>The <code>Device size</code> gives the raw device capacity.<br>
+The <code>Device allocated</code> is the sum of total space allcated for data/metadata/system profile, this also accounts for space reserved but not yet used for extents.<br>
+The <code>Device unallocated</code> is the remaining unallocated space on the device, free for future allocations.<br>
+The <code>Used</code> part is the sum of space that is currently used without any reserved space.
+The <code>Free</code> parameters give the approximate size of the remaining space.<br>
+The <code>Data ratio</code> represents the ratio of total space for data includin redundancy (single is 1.0, RAID1 is 2.0).<br>
+The <code>Metadata ratio</code> is the equivalent for metadata.<br>
+The <code>Global reserve</code> is the portion of metadata currently used for global block reserve, is only used for emergency purposes.</p>
+<p>The lower four lines are visible when running the command as superuser. This shows the stats per block group types.</p>
+<p>With <code>btrfs filesystem resize</code> mounted filesystems can be resized. Here the <code>&lt;devid&gt;</code> of the respective filesystem should be used.
+This can be found in the output of the <code>btrfs filesystem show</code> command.
+It defaults to 1 if left empty.<br>
+The <code>&lt;size&gt;</code> parameter specifies the new size of the filesystem. With prefixes (+/-) the filesystem can be increased or decreased by the quantity given.
+If the maximum available is passed the filesystem will occupy all the available space on the device. Growing is usually instantaneous, but shrinking can take a long time if there is a lot of data on the device, as the relocation of any data that is already written beyond the newly set limit needs to be relocated.<br>
+<strong>The resize command does not resize the underlying partition!</strong> To do so you must use different tools such as <code>fdisk</code> or <code>parted</code>.</p>
+<h3 id="btrfs-subvolume"><code>btrfs subvolume</code></h3>
+<p>The <code>btrfs subvolume</code> command is the command that is used to manage your subvolumes and snapshots.</p>
+<p>To list all subvolumes in a path simply enter <code>btrfs subvolume list &lt;path&gt;</code>:</p>
+<pre><code>ID 256 gen 19607 top level 5 path home
+ID 257 gen 19602 top level 5 path root
+ID 262 gen 18936 top level 257 path var/lib/machines
+</code></pre>
+<p>The <code>ID</code> is the subvolume-id, <code>gen</code> is a counter that is updated with every transaction. <code>top level</code> represents the id of the parent subvolume (5 is the topmost level) and <code>path</code> is the relative path of the subvolume to the top level subvolume.</p>
+<p>Here we see that the default Fedora-Install sets up three subvolumes in a mixed layout, where root and home are in a <em>flat</em> layout and the <code>var/lib/machines</code> subvolume is nested within the <code>home</code>.
+This subvolume is created by SystemD for use as a backend for <a href="https://www.freedesktop.org/software/systemd/man/machinectl.html"><code>machinectl</code></a>.</p>
+<p>More commands that are of note in this command:</p>
+<ul>
+<li><code>btrfs subvolume create</code> - is used to create a new subvolume.<br>
+Either it is given with a destination or the subvolume is created in the current directory.<br>
+The subvolume can also be addded to a quota-group via <code>-i &lt;qgroupid&gt;</code></li>
+<li><code>btrfs subvolume delete</code> is used to delete subvolumes and snapshots.<br>
+The deleted subvolume-directory is removed instantly, but the data-blocks are removed later in the background.</li>
+<li><code>btrfs subvolume show</code> shows more detailed information about a subvolume such as its UUID, Creation time, Subvolume ID and Name.</li>
+<li><code>btrfs subvolume snapshot</code> is used to create a snapshot of a subvolume.</li>
+</ul>
+<h3 id="btrfs-quota"><code>btrfs quota</code></h3>
+<p>The commands under <code>btrfs quota</code> are used to change the quotas of the filesystem.<br>
+According to the manpage there might be some edge-cases where quotas may lead to instability.
+In addition there are some performance implications to enabling quotas, so the activation is not recommended unless the user wants to use them.</p>
+<p>These quotas are really useful in resource allocation in multi-user environment.
+For a more detailed description the man-page of <code>btrfs-quota</code> is an excellent resource.
+On a single-user machine such as my install qgroups can be used as a replacement for partitions, so you can determine how much space a given subvolume should contain.
+This can be useful for restricting subvolumes to avoid them taking over the entire filesystem.
+For example in case of logfiles that might get very big or if creating software that might get a bit overly excited and create loads of data.<br>
+Setting and adjusting group quotas is done with the <code>btrfs qgroup</code> command.</p>
+<p>For my install I did not (yet) find a use for implementing quotas.</p>
+<h3 id="btrfs-device"><code>btrfs device</code></h3>
+<p>These commands are used to manage the devices in a Btrfs filesystem.<br>
+Device management in Btrfs works on a mounted filesystem.
+The devices can be added, removed or replaced (for replacement <code>btrfs replace</code> is used).<br>
+These commands are especially useful if you want to add disks to your current filesystem.<br>
+Another really useful set of stats can be called with the <code>btrfs device stats &lt;path/to/device&gt;</code>:</p>
+<pre><code>btrfs device stats &lt;device&gt;
+[&lt;device&gt;].write_io_errs    0
+[&lt;device&gt;].read_io_errs     0
+[&lt;device&gt;].flush_io_errs    0
+[&lt;device&gt;].corruption_errs  0
+[&lt;device&gt;].generation_errs  0
+</code></pre>
+<p><code>write_io_errs</code> records failed writes to the block device.
+These errors are rooted in layers beneath the filesystem not being able to satisfy the write request.<br>
+<code>read_io_errs</code> are the analogous errors for reads from the block device.<br>
+<code>flush_io_errs</code> are the number of failed writes with the <em>FLUSH</em> flag set.
+Flushing is a method of forcing a particular order between write requests, that is crucial for implementing crash consistency. In the case of btrfs, all metadata blocks <strong>MUST</strong> be permanently stored on the block device before the superblock is written.<br>
+<code>corruption_errs</code> show up if a block checksum is mismatched or a corrupted metadata header is found.<br>
+<code>generation_errs</code> occur when the block generateion does not match the expected value.</p>
+<p>These errors are kept in a persistent record.
+The current values are printed at mount time and updated during filesystem lifetime or from a scrub run.</p>
+<p>Other commands found under <code>btrfs device</code> are to <code>add</code>, <code>remove</code> and <code>delete</code> devices from the filesystem and/or arrays as well as to check whether all devices in a multiple device filesystem are <code>ready</code> to be mounted.</p>
+<h3 id="btrfs-scrub"><code>btrfs scrub</code></h3>
+<p>These commands are used to scrub a mounted filesystem, ergo read all data and metadata, and verify their checksums as well as automatically repair corrupted blocks if a correct copy is available.<br>
+What scrub is <strong>not</strong> is a filesystem checker that verifys or repairs structural damage to the filesystem.</p>
+<p>Results from a scrub look like the following:</p>
+<pre><code>btrfs scrub start / &amp;&amp; btrfs scrub status /
+UUID:             xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+Scrub started:    Fri Apr 30 12:18:53 2021
+Status:           finished
+Duration:         0:00:08
+Total to scrub:   25.62GiB
+Rate:             3.20GiB/s
+Error summary:    no errors found
+</code></pre>
+<h3 id="more-btrfs-commands">More <code>btrfs</code>-commands</h3>
+<p>Other useful commands under <code>btrfs</code> are:</p>
+<ul>
+<li><code>btrfs send</code> and <code>btrfs receive</code> to send data between subvolume snapshots.</li>
+<li><code>btrfs balance</code> to spread block groups across devices</li>
+<li><code>btrfs check</code>, <code>btrfs restore</code> and <code>btrfs rescue</code> if things go south.</li>
+</ul>
+<hr>
+<h1 id="what-did-i-do-part-ii---configuration-changes">What did I do? Part II - Configuration changes</h1>
+<p>With all this background out of the way I have a basic understanding of the filesystem and the current layout of the disk I work on how I want it to be laid out for my use.</p>
+<h2 id="folders-and-fstab">Folders and <code>fstab</code></h2>
+<p>For the most part the current layout works for me.
+What I do want to do is to add a folder to my home in which to store my VMs.
+As this is a folder for VMs I will disable the Copy on Write functionality as it is adviced not to use on large files with random writes.</p>
+<p>To do this:</p>
+<pre><code>mkdir VMs
+chattr +C VMs
+lsattr
+...
+---------------C---- ./VMs
+</code></pre>
+<p>Here <code>chattr +C</code> defines that the copy on write functionality of btrfs is not used for the contents of the folder.
+<em>Beware that this option only applies to files created in the directory after it is set, so best use is on empty directories.</em></p>
+<p>I chose this solution as the btrfs-man-page advices that seperate mount options are not supported for different subvolumes in the same filesystem.
+Therefore creating a new subvolume and setting the <code>nodatacow</code> mount option is not an option.
+In addition setting the <code>nodatacow</code> mount option would also prevent compression, as <code>nodatacow</code> implies <code>nodatasum</code>.</p>
+<p>I then  realized that the fstab could be optimized slightly, as I can add the <code>ssd</code> option, as I know it&rsquo;s installed on an SSD.
+Another useful flag for installations on SSDs is the <code>discard</code>-flag, especially with <code>discard=async</code> (if supported), as this allows the TRIM to operate when a block is freed.
+Additionally I used the <code>noatime</code> (to prevent frequent disk writes) and <code>space_cache</code> (to improve performance when reading block group free space into memory) options.<br>
+The fstab looks something like this:</p>
+<pre><code>UUID=... / btrfs subvol=root,ssd,noatime,space_cache,discard=async,compress=zstd:1,x-systemd.device-timeout=0 0 
+</code></pre>
+<p>After changing the fstab it is advised to let grub know about the changes.
+For this we use:</p>
+<pre><code>grub2-mkconfig -o /boot/grub2/grub.cfg
+</code></pre>
+<p><em>Note that since Fedora 34 the <a href="https://fedoraproject.org/wiki/Changes/UnifyGrubConfig">grub configuration files are all in a unified location</a>.</em><br>
+If you are on another distribution check where and how to change the grub on your system.</p>
+<p>Reboot time.</p>
+<p>After the reboot check whether all the changes worked (e.g. via <code>cat /etc/fstab</code>).</p>
+<h2 id="set-up-btrfs-scrub-to-run-regularly">Set up <code>btrfs scrub</code> to run regularly</h2>
+<p>This is one of the big advantages of btrfs: data integrity checking.
+For this we use the <code>btrfs scrub</code>-command, but I don&rsquo;t want to always have to run it manually so I set up a SystemD-Service and -Timer to have it run regularly.<br>
+I used this excellent <a href="https://www.jwillikers.com/btrfs-scrub">blog-post</a> as a starting-point.</p>
+<p>First off we want to create a systemd.service file.
+Here I will use an <a href="https://www.freedesktop.org/software/systemd/man/systemd.service.html#Service%20Templates">instantiated service</a>, just to try.
+This file will be created in the <code>/etc/systemd/system/</code> directory and will be named <code>btrfs-scrub@.service</code>.</p>
+<pre><code>[Unit]
+Description=btrfs-scrub on %f 
+ConditionPathIsMountPoint=%f
+RequiresMountsFor=%f
+
+[Service]
+Nice=19
+IOScedulingClass=idle
+KillSignal=SIGINT
+ExecStart=/usr/sbin/btrfs scrub start -B %f
+</code></pre>
+<p>Then we need a timer unit that runs the service regularly.
+I decided to let it run once a week.</p>
+<pre><code>[Unit]
+Description=btrfs-scrub on %f once a week
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+</code></pre>
+<p>When these files are created it is best to then run a <code>systemd-analyze verify &lt;files&gt;</code> .
+Then we <code>enable</code> the service via <code>systemctl start btrfs-scrub@-.service</code> and start the timer via <code>systemctl enable btrfs-scrub@-.timer</code>.
+The <code>-</code> in the files represents the <code>systemd-escape</code>d <code>/</code>.</p>
+<p>This concludes the basic btrfs-configuration that I undertook.</p>
+
+        </div>
+        
+        
+        
+
+
+        
+        
+        
+        
+        
+
+
+
+    </div>
+    
+
+    
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+
+      </div>
+    </div>
+    
+  </main>
+  <footer class="pl-scrollbar">
+    <div class="w-full max-w-screen-xl mx-auto"><div class="text-center p-6 pin-b">
+    <p class="text-sm text-tertiary-text">&copy; 2021 <a href="https://www.wangchucheng.com/">C. Wang</a> and <a href="https://www.ruiqima.com/">R. Ma</a>
+ &middot;  Powered by the <a href="https://github.com/wangchucheng/hugo-eureka" class="hover:text-eureka">Eureka</a> theme for <a href="https://gohugo.io" class="hover:text-eureka">Hugo</a></p>
+</div></div>
+  </footer>
+</body>
+
+</html>
