@@ -5,7 +5,7 @@ slug: "BtrfsFirstContact"
 ---
 # My foray into Btrfs
 ## Why?
-Fedora uses it as default for its Workstation istall and I wanted to try it for a while as the snapshotting and bitrot-detection seemed interesting for me for a while.\
+Fedora uses it as default for its Workstation install and I wanted to try it for a while as the snapshotting and bitrot-detection seemed interesting for me for a while.\
 There seem to be some benefits to be gained from reinstalling my OS on Btrfs. This blog is meant to document my learning.
 
 ---
@@ -24,7 +24,7 @@ This makes it also easy to implement *lazy copies* where a copy is just a refere
 Copy on write is however not recommended for heavily updated-in-place files such as VM-images and database stores.
 This is caused by the copy in place where you always keep the original in addition to the updated file.\
 What is also attractive about Btrfs is the fact that the file system also handles volume management, compression, snapshotting without needing extras such as LVM.\
-The snapshotting is allowing rollbacks to prior states of the file system, so if something gets messed up real bad you can just go back to a prior saved step. There are tools that make the interface with snapshotting easier, for example `snapper` (which also has integration in Fedoras `dnf` package manager via a plugin). More on that later.\
+The snapshotting is allowing rollbacks to prior states of the file system, so if something gets messed up real bad you can just go back to a prior saved step. There are tools that make the interface with snapshotting easier, for example `snapper` (which also has integration in Fedoras `dnf` package manager via a plugin). More on that at a later point.\
 Compression is a nice feature of Btrfs as it reduces file sizes, and who doesn't like to have more space on the harddrive.
 This is also helpful in that it reduces wear on the drives, as there are fewer writes to disk.
 It seems that the Fedora devs also think so as they enable transparent compression by default on install.\
