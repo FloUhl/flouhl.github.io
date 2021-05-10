@@ -6,8 +6,7 @@ en:
   # contentDir: content/en
 
 # Uncomment for multilingual sites, and customize the following config.
-# zh:
-#   languageCode: zh
-#   languageName: 简体中文
-#   contentDir: content/zh
+#   languageCode: de
+#   languageName: Deutsch
+#   contentDir: content/de
 #   title: 中文标题

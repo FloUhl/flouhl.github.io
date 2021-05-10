@@ -1,6 +1,9 @@
 ---
 title: "My foray into Btrfs"
 date: 2021-05-03
+toc: true
+authors:
+  - FlorianUhl
 slug: "BtrfsFirstContact"
 ---
 # My foray into Btrfs
@@ -42,7 +45,7 @@ For getting a good overview the [SysadminGuide](https://btrfs.wiki.kernel.org/in
 And hopefully this article.
 
 ---
-Based largely in on the Btrfs-Wikis' SysadminGuide I will now talk about important parts of the filesystem.
+The following part is based largely in on the Btrfs-Wikis' SysadminGuide.
 ## Data usage/allocation
 (Adapted from the [Btrfs-Wiki](https://btrfs.wiki.kernel.org/index.php/SysadminGuide#Data_usage_and_allocation))\
 The lowest level of the file system deals with a pool of raw storage made up of block devices containing the volume and its subvolumes.\
@@ -57,7 +60,7 @@ The cool thing about Btrfs is that each top level subvolume or volume has a moun
 When compared with LVM logical volumes Btrfs subvolumes are not similar, as the LVM logical volume is a block device in its own right containing its filesystem or container (dm-crypt, MD RAID...).\
 Each subvolume root directory differs from a directory in that each subvolume has its distinct inode number space and each inode under a subvolume has a distinct device number.
 ## Subvolume Layout
-There are two main/basic layouts to use: *flat* and *nested*.\
+There are two main/basic layouts to use: *flat* and *nested*.
 
 ---
 **Flat**: Here the subvolumes are children of the toplevel subvolume and are directly below the top level subvolume.\
