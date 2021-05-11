@@ -114,7 +114,7 @@ After all this theoretical background lets get a bit more practical.
 I installed Fedora 34 on a 500GB NVME-SSD on my desktop.
 As I wanted to get going asap I chose to nuke and pave over my previous install and use the automatic partitioning.
 What this then created was a layout that looks as follows:
-```
+```bash
 NAME                             MAJ:MIN RM   SIZE RO TYPE  MOUNTPOINT
 nvme0n1                          259:0    0 476.9G  0 disk  
 ├─nvme0n1p1                      259:1    0   600M  0 part  /boot/efi
@@ -129,20 +129,20 @@ More information can be gathered via the `btrfs` command in the terminal.
 In this part I lean heavily on the man-pages.
 ### `btrfs filesystem`
 As an example here is the default `btrfs filesystem show output`:
-```
+```bash
 Label: 'fedora_localhost-live'  uuid: uuid-goes-here-with-numbers
 	Total devices 1 FS bytes used 25.34GiB
 	devid    1 size 475.34GiB used 27.02GiB path /dev/mapper/luks-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 We can see that the label of the filesystem is still the one of the live host, so how do we change it?\
 `btrfs filesystem label` is the answer:
-```
+```bash
 btrfs filesystem label [<device>|<mountpoint>] <newlabel>
 ```
 Some other options that can be found in the `btrfs filesystem` command are `df -h` for the current allocation of block group types per mount point.
 However a nice overview can be had by using `btrfs filesystem usage <path>`.
 This command is supposed to replace the `df` command in the long run and when using it it is immediately appearent why, as it is much clearer.
-```
+```bash
 btrfs filesystem usage /
 Overall:
     Device size:            475.34GiB
@@ -191,7 +191,7 @@ If the maximum available is passed the filesystem will occupy all the available 
 The `btrfs subvolume` command is the command that is used to manage your subvolumes and snapshots.
 
 To list all subvolumes in a path simply enter `btrfs subvolume list <path>`:
-```
+```bash
 ID 256 gen 19607 top level 5 path home
 ID 257 gen 19602 top level 5 path root
 ID 262 gen 18936 top level 257 path var/lib/machines
@@ -230,7 +230,7 @@ Device management in Btrfs works on a mounted filesystem.
 The devices can be added, removed or replaced (for replacement `btrfs replace` is used).\
 These commands are especially useful if you want to add disks to your current filesystem.\
 Another really useful set of stats can be called with the `btrfs device stats <path/to/device>`:
-```
+```bash
 btrfs device stats <device>
 [<device>].write_io_errs    0
 [<device>].read_io_errs     0
@@ -256,7 +256,7 @@ These commands are used to scrub a mounted filesystem, ergo read all data and me
 What scrub is **not** is a filesystem checker that verifys or repairs structural damage to the filesystem.
 
 Results from a scrub look like the following:
-```
+```bash
 btrfs scrub start / && btrfs scrub status /
 UUID:             xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 Scrub started:    Fri Apr 30 12:18:53 2021
@@ -282,7 +282,7 @@ What I do want to do is to add a folder to my home in which to store my VMs.
 As this is a folder for VMs I will disable the Copy on Write functionality as it is adviced not to use on large files with random writes.
 
 To do this:
-```
+```bash
 mkdir VMs
 chattr +C VMs
 lsattr
@@ -300,12 +300,12 @@ I then  realized that the fstab could be optimized slightly, as I can add the `s
 Another useful flag for installations on SSDs is the `discard`-flag, especially with `discard=async` (if supported), as this allows the TRIM to operate when a block is freed.
 Additionally I used the `noatime` (to prevent frequent disk writes) and `space_cache` (to improve performance when reading block group free space into memory) options.\
 The fstab looks something like this:
-```
+```bash
 UUID=... / btrfs subvol=root,ssd,noatime,space_cache,discard=async,compress=zstd:1,x-systemd.device-timeout=0 0 
 ```
 After changing the fstab it is advised to let grub know about the changes.
 For this we use:
-```
+```bash
 grub2-mkconfig -o /boot/grub2/grub.cfg
 ```
 *Note that since Fedora 34 the [grub configuration files are all in a unified location](https://fedoraproject.org/wiki/Changes/UnifyGrubConfig).*\
@@ -323,7 +323,7 @@ I used this excellent [blog-post](https://www.jwillikers.com/btrfs-scrub) as a s
 First off we want to create a systemd.service file.
 Here I will use an [instantiated service](https://www.freedesktop.org/software/systemd/man/systemd.service.html#Service%20Templates), just to try.
 This file will be created in the `/etc/systemd/system/` directory and will be named `btrfs-scrub@.service`.
-```
+```bash
 [Unit]
 Description=btrfs-scrub on %f 
 ConditionPathIsMountPoint=%f
@@ -338,7 +338,7 @@ ExecStart=/usr/sbin/btrfs scrub start -B %f
 
 Then we need a timer unit that runs the service regularly.
 I decided to let it run once a week.
-```
+```bash
 [Unit]
 Description=btrfs-scrub on %f once a week
 
@@ -352,6 +352,6 @@ WantedBy=timers.target
 
 When these files are created it is best to then run a `systemd-analyze verify <files>` .
 Then we `enable` the service via `systemctl start btrfs-scrub@-.service` and start the timer via `systemctl enable btrfs-scrub@-.timer`.
-The `-` in the files represents the `systemd-escape`d `/`.
+The `-` in the files represents the [`systemd-escape`d](https://www.freedesktop.org/software/systemd/man/systemd-escape.html) `/`.
 
 This concludes the basic btrfs-configuration that I undertook.

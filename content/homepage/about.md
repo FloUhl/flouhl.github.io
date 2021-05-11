@@ -1,14 +1,15 @@
 ---
-title: FlorianUhl
+title: Florian Uhl
 draft: false
 role: "Site Author"
+avatar: images/FlorianUhl.jpg
 bio: "Stats, Computers, Biology, Music, Sport, Photography, not necessarily in that order."
 social:
   - icon: github
     iconPack: fab
     url: https://github.com/FloUhl
 
-weight:
+weight: 1
 widget:
   handler: about
 
@@ -17,13 +18,13 @@ widget:
 
   sidebar:
     # Options: left and right. Leave blank to hide.
-    position: left
+    position: 
     # Options: sm, md, lg and xl. Default is md.
-    scale: sm
+    scale: 
   
   background:
     # Options: primary, secondary, tertiary or any valid color value. Default is primary.
-    color: primary
+    color: tertiary
     image:
     # Options: auto, cover and contain. Default is auto.
     size:
@@ -32,7 +33,7 @@ widget:
     # Options: fixed, local, scroll.
     attachment: 
 ---
-## About this Page
+## About this Website
 This page is for documenting what interest me, be it computer related or anything interesting.
 While most of the documetation is for myself as a reference, maybe others can profit from it.
 

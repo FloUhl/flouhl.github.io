@@ -2,11 +2,13 @@
 title: "Florian Uhl"
 date: 2021-05-04T09:31:00+02:00
 role: "Site Author"
+avatar: images/FlorianUhl.jpg
 bio: "Stats, Computers, Biology, Music, Sport, not necessarily in that order."
 social:
   - icon: github
     iconPack: fab
     url: https://github.com/FloUhl
+imgLeft: images/FlorianUhl.jpg
 ---
 
 ## About this Page
