@@ -8,7 +8,7 @@ slug: "BtrfsFirstContact"
 ---
 # My foray into Btrfs
 ## Why?
-Fedora uses it as default for its Workstation install and I wanted to try it for a while as the snapshotting and bitrot-detection seemed interesting for me for a while.\
+Fedora uses it as default for its Workstation install and I wanted to try it for a while as the snapshotting and bitrot-detection seemed interesting to me for a while.\
 There seem to be some benefits to be gained from reinstalling my OS on Btrfs. This blog is meant to document my learning.
 
 ---
@@ -36,7 +36,7 @@ This is great for people like me who are always concerned about their data devel
 
 These features in turn mean, that Btrfs is slightly less performant than other file systems like XFS or Ext4 as the overhead for the checksumming and compression does impact performance.
 
-One thing that Btrfs does not manage itself is encryption. However this can easily be solved by using [`dm-crypt`](https://www.kernel.org/doc/html/latest/admin-guide/device-mapper/dm-crypt.html#), the transparend disk encription subsystem in the Linux kernel.
+One thing that Btrfs does not manage itself is encryption. However this can easily be solved by using [`dm-crypt`](https://www.kernel.org/doc/html/latest/admin-guide/device-mapper/dm-crypt.html#), the transparent disk encryption subsystem in the Linux kernel.
 
 ---
 ## Where to start?
@@ -67,8 +67,8 @@ There are two main/basic layouts to use: *flat* and *nested*.
 This has several implications:
 - Subvolume management is considered to be easier as the effective layout is more directly visible.
 - All subvolumes need to be mounted manually (or via fstab) to the desired location
-- Each subvolume can be mounted with some options being different, but all options must always be explicitely stated.
-- Everthing in the volume that is **not** beneath a mounted subvolume is inaccessible. This can be beneficial for security/snapshots
+- Each subvolume can be mounted with some options being different, but all options must always be explicitly stated.
+- Everything in the volume that is **not** beneath a mounted subvolume is inaccessible. This can be beneficial for security/snapshots
 
 ---
 **Nested**: Here we have subvolumes located anywhere in the file hierarchy. Typically in their desired locations, where they'd be typically mounted in the flat schema.\
@@ -99,7 +99,7 @@ Splitting might also be sensible in cases of special mount options.
 A could be described as saving the metadata of a subvolume at a specific point in time.
 Therefore they are heavily reliant on the CoW capabilities of Btrfs.\
 In the [Btrfs-Wiki](https://btrfs.wiki.kernel.org/index.php/SysadminGuide#Snapshots) a Snapshot is described as:
-> [...] a subvolume that shares its data (and metadata) with some other subvolume, using Btrfs's COW capabilities.
+> [...] a subvolume that shares its data (and metadata) with some other subvolume, using Btrfs' COW capabilities.
 
 Once a snapshot is taken there is no difference between the original subvolume and the snapshot, after the snapshot the "original" subvolume is then written to and its layout changes.\
 The snapshot can be rolled back to by unmounting and renaming the original subvolume and then renaming the snapshot to the original subvolumes name and mounting the snapshot.
@@ -141,7 +141,7 @@ btrfs filesystem label [<device>|<mountpoint>] <newlabel>
 ```
 Some other options that can be found in the `btrfs filesystem` command are `df -h` for the current allocation of block group types per mount point.
 However a nice overview can be had by using `btrfs filesystem usage <path>`.
-This command is supposed to replace the `df` command in the long run and when using it it is immediately appearent why, as it is much clearer.
+This command is supposed to replace the `df` command in the long run and when using it it is immediately apparent why, as it is much clearer.
 ```bash
 btrfs filesystem usage /
 Overall:
@@ -170,11 +170,11 @@ Unallocated:
    /dev/mapper/luks-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx   448.32GiB
 ```
 The `Device size` gives the raw device capacity.\
-The `Device allocated` is the sum of total space allcated for data/metadata/system profile, this also accounts for space reserved but not yet used for extents.\
+The `Device allocated` is the sum of total space allocated for data/metadata/system profile, this also accounts for space reserved but not yet used for extents.\
 The `Device unallocated` is the remaining unallocated space on the device, free for future allocations.\
 The `Used` part is the sum of space that is currently used without any reserved space.
 The `Free` parameters give the approximate size of the remaining space.\
-The `Data ratio` represents the ratio of total space for data includin redundancy (single is 1.0, RAID1 is 2.0).\
+The `Data ratio` represents the ratio of total space for data including redundancy (single is 1.0, RAID1 is 2.0).\
 The `Metadata ratio` is the equivalent for metadata.\
 The `Global reserve` is the portion of metadata currently used for global block reserve, is only used for emergency purposes.
 
@@ -244,7 +244,7 @@ These errors are rooted in layers beneath the filesystem not being able to satis
 `flush_io_errs` are the number of failed writes with the *FLUSH* flag set.
 Flushing is a method of forcing a particular order between write requests, that is crucial for implementing crash consistency. In the case of btrfs, all metadata blocks **MUST** be permanently stored on the block device before the superblock is written.\
 `corruption_errs` show up if a block checksum is mismatched or a corrupted metadata header is found.\
-`generation_errs` occur when the block generateion does not match the expected value.
+`generation_errs` occur when the block generation does not match the expected value.
 
 These errors are kept in a persistent record.
 The current values are printed at mount time and updated during filesystem lifetime or from a scrub run.
@@ -253,7 +253,7 @@ Other commands found under `btrfs device` are to `add`, `remove` and `delete` de
 
 ### `btrfs scrub`
 These commands are used to scrub a mounted filesystem, ergo read all data and metadata, and verify their checksums as well as automatically repair corrupted blocks if a correct copy is available.\
-What scrub is **not** is a filesystem checker that verifys or repairs structural damage to the filesystem.
+What scrub is **not** is a filesystem checker that verifies or repairs structural damage to the filesystem.
 
 Results from a scrub look like the following:
 ```bash
@@ -292,7 +292,7 @@ lsattr
 Here `chattr +C` defines that the copy on write functionality of btrfs is not used for the contents of the folder.
 *Beware that this option only applies to files created in the directory after it is set, so best use is on empty directories.*
 
-I chose this solution as the btrfs-man-page advices that seperate mount options are not supported for different subvolumes in the same filesystem.
+I chose this solution as the btrfs-man-page advices that separate mount options are not supported for different subvolumes in the same filesystem.
 Therefore creating a new subvolume and setting the `nodatacow` mount option is not an option.
 In addition setting the `nodatacow` mount option would also prevent compression, as `nodatacow` implies `nodatasum`.
 
