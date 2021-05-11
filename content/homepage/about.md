@@ -34,7 +34,7 @@ widget:
     attachment: 
 ---
 ## About this Website
-This page is for documenting what interest me, be it computer related or anything interesting.
+This page is for documenting what interests me, be it computer related or anything interesting.
 While most of the documetation is for myself as a reference, maybe others can profit from it.
 
 ## About Me
